@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System;
@@ -5,21 +7,70 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OpenQA.Selenium.Interactions;
 
 namespace selenium_tests;
 
-class Exercise_BasicMaintenance
+public class Exercise_BasicMaintenance
 {
     IWebDriver driver;
+    By GoogleSearchBar = By.XPath("//textarea[@title='Buscar']");
+    By UnoSquareGoogleRecommendation = By.XPath("//li[@data-entityname='unosquare']");
+    By UnoSquareGoogleResult = By.XPath("//h3[text()='Unosquare: Home Page - Smart Engineering For Your Digital ...']");
+    By UnoSquareServicesMenu = By.XPath("//a[text()='Services']");
+    By PracticeAreas = By.XPath("//a[text()='Industries']");
+    By ContactUs = By.XPath("//span[text()='Contact Us']");
     
-    public IWebDriver SetUpDriver()
+    [SetUp]
+    public void SetUpDriver()
     {
         driver = new ChromeDriver();
         driver.Manage().Window.Maximize();
         driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(15);
-        return driver;
     }
     
+    [Test]
+    [Category("Unosquare")]
+    public void UnosquareTest()
+    {
+        driver.Navigate().GoToUrl("https://www.google.com");
+
+        closeLoginGoogle(driver);
+
+        SendText(driver.FindElement(GoogleSearchBar), "Unosquare");
+
+        Click(driver.FindElement(UnoSquareGoogleRecommendation));
+
+        Click(driver.FindElements(UnoSquareGoogleResult)[0]);
+
+        Click(driver.FindElements(UnoSquareServicesMenu)[1]);
+
+        ClassicAssert.AreEqual(driver.Url, "https://www.unosquare.com/services/");
+
+        Click(driver.FindElements(PracticeAreas)[1]);
+
+        ClassicAssert.AreEqual(driver.Url, "https://www.unosquare.com/industries/");
+
+        Click(driver.FindElement(ContactUs));
+
+        ClassicAssert.AreEqual(driver.Url, "https://www.unosquare.com/contact-us/");
+    }
+
+    [TearDown]
+    public void close_Browser()
+    {
+        driver.Quit();
+    }
+
+    public void closeLoginGoogle(IWebDriver driver)
+    {
+        IWebElement iframe = driver.FindElement(By.XPath("//iframe[@role='presentation']"));
+        driver.SwitchTo().Frame(iframe);
+        driver.FindElement(By.XPath("//button[text()='No acceder']")).Click();
+
+        driver.SwitchTo().DefaultContent();
+    }
+
     public void Click(IWebElement element)
     {
         element.Click();
@@ -28,51 +79,5 @@ class Exercise_BasicMaintenance
     public void SendText(IWebElement element, string value)
     {
         element.SendKeys(value);
-    }
-
-    #region Google Locators
-    By GoogleSearchBar = By.XPath("need maintenance");
-    By GoogleSearIcon = By.XPath("need maintenance");
-    By UnoSquareGoogleResult = By.XPath("need maintenance");
-    #endregion
-
-    #region UnoSquare Locators
-    By UnoSquareServicesMenu = By.XPath("need maintenance");
-    By PracticeAreas = By.XPath("need maintenance");
-    By ContactUs = By.XPath("need maintenance");
-    #endregion 
-    
-    static void Main(string[] args)
-    {
-        IWebDriver Browser;
-        IWebElement element;
-        Program program = new Program();
-        Browser = program.SetUpDriver();
-        Browser.Url = "https://www.google.com";
-
-        element = Browser.FindElement(program.GoogleSearchBar);
-
-        program.SendText(element, "Unosquare");
-
-        element = Browser.FindElement(program.GoogleSearIcon);
-
-        program.Click(element);
-
-        element = Browser.FindElement(program.UnoSquareGoogleResult);
-
-        program.Click(element);
-
-        element = Browser.FindElement(program.UnoSquareServicesMenu);
-
-        program.Click(element);
-
-        element = Browser.FindElement(program.PracticeAreas);
-
-        program.Click(element);
-
-        element = Browser.FindElement(program.ContactUs);
-
-        program.Click(element);
-    
     }
 }
